@@ -48,29 +48,29 @@
 ## 🧭 系统架构
 
 <p align="center">
-  <img src="figures/fig2_system-architecture.png" alt="端到端系统架构" width="92%"/>
+  <img src="figures/fig2_system-architecture.png" alt="端到端系统架构" width="70%"/>
 </p>
 <p align="center"><em>图 2：端到端架构。左：外骨骼–VR 遥操作采集臂、夹爪与底盘指令；右：训练后的 MiMoCo 根据观测生成全身控制动作。</em></p>
 
 | 阶段 | 内容 |
 |------|------|
-| **数据采集** | 三视角 RGB（头部、左右腕）+ 本体感知 + 18 维全身动作，50 Hz（\(\Delta t = 20\) ms） |
-| **策略学习** | ECM-Net 编码动作块潜变量 \(\mathbf{z}\)；MRF-Net 融合多相机视觉与 \(\mathbf{s}_t\) 解码未来 \(K\) 步动作 |
-| **部署执行** | 推理时 \(\mathbf{z}=\mathbf{0}\)；重叠 chunk 指数加权时序融合（\(m=0.01\)）保证平滑 |
+| **数据采集** | 三视角 RGB（头部、左右腕）+ 本体感知 + 18 维全身动作，50 Hz（$\Delta t = 20$ ms） |
+| **策略学习** | ECM-Net 编码动作块潜变量 $\mathbf{z}$；MRF-Net 融合多相机视觉与 $\mathbf{s}_t$ 解码未来 $K$ 步动作 |
+| **部署执行** | 推理时 $\mathbf{z}=\mathbf{0}$；重叠 chunk 指数加权时序融合（$m=0.01$）保证平滑 |
 
 ---
 
 ## 🤖 外骨骼–VR 遥操作
 
 <p align="center">
-  <img src="figures/fig3_teleop-system.png" alt="外骨骼VR遥操作与Robint平台" width="92%"/>
+  <img src="figures/fig3_teleop-system.png" alt="外骨骼VR遥操作与Robint平台" width="70%"/>
 </p>
 <p align="center"><em>图 3：外骨骼–VR 遥操作系统（左）与轮式移动机器人 Robint（右）。</em></p>
 
 - **外骨骼双臂**：每臂 7 DoF，与人体手臂同构，实时关节角映射与过载力反馈。  
 - **VR（Meta Quest 3）**：摇杆控制线/角速度，Trigger 控制夹爪，Grip 作为使能开关；头戴 FPV。  
 - **主控与通信**：OrangePi Zero 2 + ROS 分布式节点；多源时间戳对齐与低通滤波。  
-- **力反馈**：当 \(\Delta\Theta(t) > \tau_{\mathrm{total}}\)（部署中 \(\tau_{\mathrm{total}}=0.15\) rad）时外骨骼锁定，提示接触过载。
+- **力反馈**：当 $\Delta\Theta(t) > \tau_{\mathrm{total}}$（部署中 $\tau_{\mathrm{total}}=0.15$ rad）时外骨骼锁定，提示接触过载。
 
 ---
 
@@ -81,18 +81,18 @@
 </p>
 <p align="center"><em>图 4：左 ECM-Net—阶段级时序上下文；右 MRF-Net—GRF 宏观规划 + LRF 精细操作的双路径注意力。</em></p>
 
-**输入**：多相机 RGB \(\{i_t\}\)，本体 \(\mathbf{s}_t = [q_t, g_t, b_t] \in \mathbb{R}^{18}\)（14 维双臂 + 2 维夹爪 + 2 维底盘速度）。  
-**输出**：未来 \(K=100\) 步动作块 \(\hat{a}_{t:t+K}\)（18 维全身目标）。  
-**训练目标**：动作 L1 + 潜变量 KL（权重 10）；**推理**：\(\mathbf{z}=\mathbf{0}\)。
+**输入**：多相机 RGB $\{i_t\}$，本体 $\mathbf{s}_t = [q_t, g_t, b_t] \in \mathbb{R}^{18}$（14 维双臂 + 2 维夹爪 + 2 维底盘速度）。  
+**输出**：未来 $K=100$ 步动作块 $\hat{a}_{t:t+K}$（18 维全身目标）。  
+**训练目标**：动作 L1 + 潜变量 KL（权重 10）；**推理**：$\mathbf{z}=\mathbf{0}$。
 
 | 模块 | 论文设计 | 代码路径（持续更新） |
 |------|----------|----------------------|
-| ECM-Net | 可学习 \(w_a\) 压缩全局 phase intent，门控检索历史 \(K\) | `mimoco_models/models/` 编码器 |
-| MRF-Net | LRF 局部窗口 \(k{=}6\)，GRF 全局 GAP，头比例 \(\alpha{=}0.4\) | `mimoco_models/models/transformer.py` |
+| ECM-Net | 可学习 $w_a$ 压缩全局 phase intent，门控检索历史 $K$ | `mimoco_models/models/` 编码器 |
+| MRF-Net | LRF 局部窗口 $k{=}6$，GRF 全局 GAP，头比例 $\alpha{=}0.4$ | `mimoco_models/models/transformer.py` |
 | 视觉骨干 | 每相机独立 ResNet-18 + 2D 正弦位置编码 | `mimoco_models/models/backbone.py` |
 | 策略封装 | CVAE + chunk 解码 | `policy.py` → `ChunkSeqPolicy`（`CHUNK_SEQ`） |
 
-**默认超参**（与论文 Sec. IV 一致）：\(d_{\mathrm{model}}{=}512\)，FFN \(3200\)，8 头，编码器 4 层 / 解码器 7 层，约 103.77M 参数。
+**默认超参**（与论文 Sec. IV 一致）：$d_{\mathrm{model}}{=}512$，FFN $3200$，8 头，编码器 4 层 / 解码器 7 层，约 103.77M 参数。
 
 ---
 
@@ -115,7 +115,7 @@
 | Object Sorting | Identify → Move → Place | 双色箱体识别与分放 |
 | Obstacle Clearance | Grasp → Clear → Move | 路障抓取、移开、通行 |
 
-每任务 50 条示教，单操作者采集；图像 \(480\times640\)，三相机。
+每任务 50 条示教，单操作者采集；图像 $480\times640$，三相机。
 
 <p align="center">
   <img src="figures/fig10_exp.png" alt="四类任务真机执行" width="96%"/>
@@ -126,35 +126,24 @@
 
 ## 🔥 开源进度
 
-我们按论文模块推进完整开源，下表供跟踪（✅ 已随仓库发布 · 🚧 即将推送）。
-
-### 模仿学习与数据
+✅ 已发布 · 🚧 即将推送
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| HDF5 示教加载与归一化 | ✅ | [`utils.py`](utils.py) `EpisodicDataset` |
-| MiMoCo 策略训练（`CHUNK_SEQ`） | ✅ | CVAE + 动作分块，[`imitate_episodes.py`](imitate_episodes.py) |
-| 基线：Diffusion Policy、CNNMLP | ✅ | [`policy.py`](policy.py) |
-| 训练日志与 checkpoint | ✅ | W&B + `policy_best.ckpt` |
-| 验证集 loss 评估 | ✅ | `imitate_episodes.py --eval` |
-| HDF5 可视化 | ✅ | [`visualize_episodes.py`](visualize_episodes.py) |
-| ECM-Net 完整实现 | 🚧 | 阶段级门控时序编码（Sec. III-B-2） |
-| MRF-Net 完整实现 | 🚧 | LRF/GRF 双路径，\(\alpha\)、\(k\) 可配置（Sec. III-B-3） |
-| 推理时序融合（Alg. 2） | 🚧 | \(w_j=\exp(-mj)\)，\(m=0.01\) |
-| 18 维 \(\mathbf{s}_t=[q,g,b]\) 显式输入 | 🚧 | 与论文观测空间对齐 |
-| BeT 基线 | 🚧 | 论文对比实验 |
-| ECM-only / MRF-only 消融开关 | 🚧 | 论文 Table 消融 |
-| 真机 rollout 与子任务成功率评估 | 🚧 | Sec. IV 指标脚本 |
-| 长程 MSE / 注意力可视化分析 | 🚧 | Sec. IV-F |
+| 数据管线（HDF5 加载、归一化、可视化） | ✅ | [`utils.py`](utils.py)、`EpisodicDataset`、[`visualize_episodes.py`](visualize_episodes.py) |
+| 训练框架（`CHUNK_SEQ` + 基线） | ✅ | CVAE 动作分块 + Diffusion/CNNMLP，见 [`imitate_episodes.py`](imitate_episodes.py)、[`policy.py`](policy.py) |
+| 实验基础设施（日志/权重/验证） | ✅ | W&B、`policy_best.ckpt`、`imitate_episodes.py --eval` |
+| MiMoCo 核心模块（ECM-Net + MRF-Net） | 🚧 | Sec. III-B-2/III-B-3：阶段门控时序编码 + LRF/GRF 双路径注意力（$\alpha$、$k$） |
+| 推理与建模对齐 | 🚧 | 时序融合（Alg. 2）、显式 18 维 $\mathbf{s}_t=[q,g,b]$、BeT 基线、ECM/MRF 消融 |
+| 评估与分析脚本 | 🚧 | 真机 rollout/子任务指标 + 长程 MSE/注意力分析（Sec. IV） |
 
-### 遥操作与部署
+**遥操作 / 部署**
 
 | 模块 | 状态 | 说明 |
 |------|------|------|
-| 论文配图 [`figures/`](figures/) | ✅ | 含总览、架构、任务与实验图 |
-| 外骨骼–VR ROS 遥操作栈 | 🚧 | 采集、力反馈、时间同步 |
-| 真机部署节点 | 🚧 | 观测订阅 + chunk 执行 + 时序融合 |
-| 示例数据集 | 🚧 | 格式说明见 [`data/README.md`](data/README.md) |
+| 资源与文档 | ✅ | 论文配图见 [`figures/`](figures/)（总览、架构、任务、实验） |
+| 遥操作与部署栈 | 🚧 | 外骨骼–VR ROS 采集 + 力反馈 + 时间同步 + 真机执行节点 |
+| 公共数据发布 | 🚧 | 示例数据包与格式说明见 [`data/README.md`](data/README.md) |
 
 ---
 
@@ -243,7 +232,7 @@ python visualize_episodes.py --dataset_dir "$MIMOCO_DATA_DIR" --episode_idx 0
 |------|------|
 | [`figures/`](figures/) | 论文插图（PDF/PNG） |
 | [`imitate_episodes.py`](imitate_episodes.py) | 训练 / 验证入口 |
-| [`policy.py`](policy.py) | MiMoCo（`ChunkSeqPolicy`）与基线 |
+| [`policy.py`](policy.py) | MiMoCo与基线 |
 | [`mimoco_models/`](mimoco_models/) | ResNet 骨干、Transformer、SeqVAE |
 | [`utils.py`](utils.py) | 数据加载 |
 | [`constants.py`](constants.py) | 控制周期常量 |
@@ -259,7 +248,7 @@ python visualize_episodes.py --dataset_dir "$MIMOCO_DATA_DIR" --episode_idx 0
   title={MiMoCo: A Multimodal Imitation Learning Framework for Whole-Body Mobile Control with Exoskeleton-VR Teleoperation},
   author={Mei, Jie and Wu, Xinkai and Zhang, Yue and Song, Tao and Xiong, Zhongxia},
   journal={IEEE Internet of Things Journal},
-  year={2025}
+  year={2026}
 }
 ```
 

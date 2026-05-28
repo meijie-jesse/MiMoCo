@@ -48,29 +48,29 @@ On the real-world dual-arm wheeled robot **Robint**, across four tasks (stowing,
 ## 🧭 System Architecture
 
 <p align="center">
-  <img src="figures/fig2_system-architecture.png" alt="System Architecture" width="92%"/>
+  <img src="figures/fig2_system-architecture.png" alt="System Architecture" width="70%"/>
 </p>
 <p align="center"><em>Fig. 2: End-to-end architecture. Left: exoskeleton-VR teleoperation collects arm, gripper, and base commands. Right: the trained MiMoCo policy generates whole-body control actions from robot observations.</em></p>
 
 | Stage | Description |
 |------|-------------|
-| **Data Collection** | Three-view RGB (head, left wrist, right wrist) + proprioception + 18-D whole-body actions, 50 Hz (\(\Delta t = 20\) ms) |
-| **Policy Learning** | ECM-Net encodes action chunks into latent \(\mathbf{z}\); MRF-Net fuses multi-camera visual features and \(\mathbf{s}_t\) to decode the next \(K\)-step actions |
-| **Deployment** | Inference uses \(\mathbf{z}=\mathbf{0}\); overlapping chunk temporal ensembling with exponential weighting (\(m=0.01\)) for smooth control |
+| **Data Collection** | Three-view RGB (head, left wrist, right wrist) + proprioception + 18-D whole-body actions, 50 Hz ($\Delta t = 20$ ms) |
+| **Policy Learning** | ECM-Net encodes action chunks into latent $\mathbf{z}$; MRF-Net fuses multi-camera visual features and $\mathbf{s}_t$ to decode the next $K$-step actions |
+| **Deployment** | Inference uses $\mathbf{z}=\mathbf{0}$; overlapping chunk temporal ensembling with exponential weighting ($m=0.01$) for smooth control |
 
 ---
 
 ## 🤖 Exoskeleton-VR Teleoperation
 
 <p align="center">
-  <img src="figures/fig3_teleop-system.png" alt="Teleoperation System and Robint Platform" width="92%"/>
+  <img src="figures/fig3_teleop-system.png" alt="Teleoperation System and Robint Platform" width="70%"/>
 </p>
 <p align="center"><em>Fig. 3: Integrated exoskeleton-VR teleoperation system (left) and wheeled robot Robint (right).</em></p>
 
 - **Exoskeleton dual arms**: 7 DoF per arm with isomorphic structure to human arms; real-time joint mapping and overload-triggered force feedback.
 - **VR (Meta Quest 3)**: joysticks for linear/angular base velocity, trigger for gripper aperture, grip button as enable switch, and head-mounted first-person visual feedback.
 - **Control and communication**: OrangePi Zero 2 + distributed ROS nodes; multi-source timestamp alignment and low-pass filtering.
-- **Force feedback**: when \(\Delta\Theta(t) > \tau_{\mathrm{total}}\) (\(\tau_{\mathrm{total}}=0.15\) rad in deployment), the exoskeleton is locked to indicate contact overload and improve operational safety.
+- **Force feedback**: when $\Delta\Theta(t) > \tau_{\mathrm{total}}$ ($\tau_{\mathrm{total}}=0.15$ rad in deployment), the exoskeleton is locked to indicate contact overload and improve operational safety.
 
 ---
 
@@ -81,18 +81,18 @@ On the real-world dual-arm wheeled robot **Robint**, across four tasks (stowing,
 </p>
 <p align="center"><em>Fig. 4: Left, ECM-Net for phase-level temporal context modeling. Right, MRF-Net for GRF macro planning + LRF fine manipulation via dual-path attention.</em></p>
 
-**Input**: multi-camera RGB \(\{i_t\}\), proprioception \(\mathbf{s}_t = [q_t, g_t, b_t] \in \mathbb{R}^{18}\) (14-D dual-arm + 2-D gripper + 2-D base velocity).  
-**Output**: future action chunk \(\hat{a}_{t:t+K}\), with \(K=100\) steps and 18-D whole-body targets.  
-**Objective**: action L1 + KL divergence (KL weight = 10); **inference** uses \(\mathbf{z}=\mathbf{0}\).
+**Input**: multi-camera RGB $\{i_t\}$, proprioception $\mathbf{s}_t = [q_t, g_t, b_t] \in \mathbb{R}^{18}$ (14-D dual-arm + 2-D gripper + 2-D base velocity).  
+**Output**: future action chunk $\hat{a}_{t:t+K}$, with $K=100$ steps and 18-D whole-body targets.  
+**Objective**: action L1 + KL divergence (KL weight = 10); **inference** uses $\mathbf{z}=\mathbf{0}$.
 
 | Module | Paper Design | Code Path (continuously updated) |
 |------|---------------|-----------------------------------|
-| ECM-Net | Learnable \(w_a\) to compress global phase intent and gate historical retrieval over \(K\) | `mimoco_models/models/` encoder |
-| MRF-Net | LRF local windows (\(k=6\)) + GRF global GAP; head split ratio \(\alpha=0.4\) | `mimoco_models/models/transformer.py` |
+| ECM-Net | Learnable $w_a$ to compress global phase intent and gate historical retrieval over $K$ | `mimoco_models/models/` encoder |
+| MRF-Net | LRF local windows ($k=6$) + GRF global GAP; head split ratio $\alpha=0.4$ | `mimoco_models/models/transformer.py` |
 | Visual Backbone | Per-camera ResNet-18 + 2D sinusoidal position encoding | `mimoco_models/models/backbone.py` |
 | Policy Wrapper | CVAE + chunk decoding | `policy.py` -> `ChunkSeqPolicy` (`CHUNK_SEQ`) |
 
-**Default hyperparameters** (aligned with paper Sec. IV): \(d_{\mathrm{model}}=512\), FFN \(=3200\), 8 heads, 4 encoder layers / 7 decoder layers, about 103.77M parameters.
+**Default hyperparameters** (aligned with paper Sec. IV): $d_{\mathrm{model}}=512$, FFN $=3200$, 8 heads, 4 encoder layers / 7 decoder layers, about 103.77M parameters.
 
 ---
 
@@ -115,7 +115,7 @@ On the real-world dual-arm wheeled robot **Robint**, across four tasks (stowing,
 | Object Sorting | Identify -> Move -> Place | Color-based object identification and placement |
 | Obstacle Clearance | Grasp -> Clear -> Move | Grasp obstacle, clear it, and pass through constrained space |
 
-Each task contains 50 demonstrations collected by a single operator; image resolution is \(480 \times 640\) with three cameras.
+Each task contains 50 demonstrations collected by a single operator; image resolution is $480 \times 640$ with three cameras.
 
 <p align="center">
   <img src="figures/fig10_exp.png" alt="Real-robot Sequential Execution" width="96%"/>
@@ -126,35 +126,24 @@ Each task contains 50 demonstrations collected by a single operator; image resol
 
 ## 🔥 Open-Source Progress
 
-We track release progress by paper modules (✅ released in this repo · 🚧 upcoming release).
-
-### Imitation Learning and Data
+✅ released · 🚧 upcoming
 
 | Module | Status | Notes |
 |------|------|------|
-| HDF5 episodic loading and normalization | ✅ | [`utils.py`](utils.py), `EpisodicDataset` |
-| MiMoCo policy training (`CHUNK_SEQ`) | ✅ | CVAE + action chunking, [`imitate_episodes.py`](imitate_episodes.py) |
-| Baselines: Diffusion Policy, CNNMLP | ✅ | [`policy.py`](policy.py) |
-| Training logs and checkpoints | ✅ | W&B + `policy_best.ckpt` |
-| Validation-loss evaluation | ✅ | `imitate_episodes.py --eval` |
-| HDF5 visualization | ✅ | [`visualize_episodes.py`](visualize_episodes.py) |
-| Full ECM-Net implementation | 🚧 | Phase-gated temporal encoder (Sec. III-B-2) |
-| Full MRF-Net implementation | 🚧 | LRF/GRF dual-path with configurable \(\alpha\), \(k\) (Sec. III-B-3) |
-| Inference temporal ensembling (Alg. 2) | 🚧 | \(w_j=\exp(-mj)\), \(m=0.01\) |
-| Explicit 18-D \(\mathbf{s}_t=[q,g,b]\) input | 🚧 | Paper-aligned observation space |
-| BeT baseline | 🚧 | Paper comparison baseline |
-| ECM-only / MRF-only ablation switches | 🚧 | Paper ablation table |
-| Real-robot rollout + subtask success scripts | 🚧 | Sec. IV metrics |
-| Long-horizon MSE / attention visualization scripts | 🚧 | Sec. IV-F |
+| Data pipeline (HDF5 loading, normalization, visualization) | ✅ | [`utils.py`](utils.py), `EpisodicDataset`, [`visualize_episodes.py`](visualize_episodes.py) |
+| Training framework (`CHUNK_SEQ` + baselines) | ✅ | CVAE action chunking + Diffusion/CNNMLP in [`imitate_episodes.py`](imitate_episodes.py), [`policy.py`](policy.py) |
+| Experiment infrastructure (logging/checkpoints/validation) | ✅ | W&B, `policy_best.ckpt`, `imitate_episodes.py --eval` |
+| Core MiMoCo modules (ECM-Net + MRF-Net) | 🚧 | Sec. III-B-2/III-B-3: phase-gated temporal encoder + LRF/GRF dual-path attention ($\alpha$, $k$) |
+| Inference and modeling alignment | 🚧 | Temporal ensembling (Alg. 2), explicit 18-D $\mathbf{s}_t=[q,g,b]$, BeT baseline, ECM/MRF ablations |
+| Evaluation and analysis scripts | 🚧 | Real-robot rollout/subtask metrics + long-horizon MSE/attention analysis (Sec. IV) |
 
-### Teleoperation and Deployment
+**Teleoperation / Deployment**
 
 | Module | Status | Notes |
 |------|------|------|
-| Paper figures [`figures/`](figures/) | ✅ | Overview, architecture, tasks, and experiment figures |
-| Exoskeleton-VR ROS teleoperation stack | 🚧 | Collection, force feedback, and timestamp sync |
-| Real-robot deployment nodes | 🚧 | Observation subscriber + chunk execution + temporal ensembling |
-| Example dataset release | 🚧 | Format spec in [`data/README.md`](data/README.md) |
+| Assets and docs | ✅ | Paper figures in [`figures/`](figures/) (overview, architecture, tasks, experiments) |
+| Teleoperation and deployment stack | 🚧 | Exoskeleton-VR ROS collection + force feedback + timestamp sync + real-robot execution nodes |
+| Public data release | 🚧 | Example dataset package and format guide in [`data/README.md`](data/README.md) |
 
 ---
 
@@ -243,7 +232,7 @@ Control frequency is aligned with the paper: `FPS=50`, `DT=0.02` in [`constants.
 |------|-------------|
 | [`figures/`](figures/) | Paper figures (PNG) |
 | [`imitate_episodes.py`](imitate_episodes.py) | Training / validation entry |
-| [`policy.py`](policy.py) | MiMoCo (`ChunkSeqPolicy`) and baselines |
+| [`policy.py`](policy.py) | MiMoCo and baselines |
 | [`mimoco_models/`](mimoco_models/) | ResNet backbone, Transformer, SeqVAE |
 | [`utils.py`](utils.py) | Data loading |
 | [`constants.py`](constants.py) | Control-period constants |
@@ -261,7 +250,7 @@ If you use this codebase or MiMoCo method, please cite:
   title={MiMoCo: A Multimodal Imitation Learning Framework for Whole-Body Mobile Control with Exoskeleton-VR Teleoperation},
   author={Mei, Jie and Wu, Xinkai and Zhang, Yue and Song, Tao and Xiong, Zhongxia},
   journal={IEEE Internet of Things Journal},
-  year={2025}
+  year={2026}
 }
 ```
 
