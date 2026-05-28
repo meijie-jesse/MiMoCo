@@ -1,0 +1,1 @@
+This directory implements the MiMoCo sequence policy (multi-camera CNN backbone + Transformer), released under **Apache License 2.0**. The structure derives from a public Transformer-backbone reference codebase and was rewritten for action-sequence modeling. See `LICENSE` in this folder for the full text.
